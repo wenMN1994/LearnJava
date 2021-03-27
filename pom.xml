@@ -19,6 +19,7 @@
         <module>CommonApi</module>
         <module>LearnFreemarker</module>
         <module>LearnLucene</module>
+        <module>LearnJxls</module>
     </modules>
 
     <properties>
@@ -76,6 +77,14 @@
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
