@@ -71,7 +71,7 @@ public class DynWordUtils {
      * @param outPath      生成的文件存放的本地全路径
      */
     public static void process(Map<String, Object> paramMap, String templatePaht, String outPath) {
-        // TODO 入口
+        // 入口
     	DynWordUtils dynWordUtils = new DynWordUtils();
         dynWordUtils.setParamMap(paramMap);
         dynWordUtils.createWord(templatePaht, outPath);
@@ -266,7 +266,7 @@ public class DynWordUtils {
      * @param paramMap 需要替换的信息集合
      */
     public void settleTable(XWPFTable table, Map<String, Object> paramMap) throws Exception {
-        // TODO 处理当前表格
+        // 处理当前表格
     	currentTableIndex++;
     	String messagePre = "当前解析表格"+currentTableIndex; 
     	logger.info(messagePre);
@@ -299,7 +299,7 @@ public class DynWordUtils {
      * @throws Exception
      */
     private boolean delAndJudgeRow(XWPFTable table, Map<String, Object> paramMap, XWPFTableRow row) throws Exception {
-        // TODO 表格动态行处理
+        // 表格动态行处理
         logger.info("当前行数="+currentRowIndex);
     	if (PoiWordUtils.isAddRow(row)) {
             List<XWPFTableRow> xwpfTableRows = addAndGetRows(table, row, paramMap);
@@ -493,7 +493,7 @@ public class DynWordUtils {
      * @throws Exception
      */
     private List<XWPFTableRow> addAndGetMergeRows(XWPFTable table, XWPFTableRow flagRow, Map<String, Object> paramMap) throws Exception {
-    	// TODO 添加动态行并且合并等
+    	// 添加动态行并且合并等
     	List<XWPFTableCell> flagRowCells = flagRow.getTableCells();// 获取待添加的数据总数
     	XWPFTableCell flagCell = flagRowCells.get(0);
     	
@@ -608,7 +608,7 @@ public class DynWordUtils {
    	 * @param newrowIndex 需要新增一行的位置
    	 * */
    	public static void insertRowPosition(XWPFTable table, int copyrowIndex, int newrowIndex) {
-   		// TODO 在表格中指定的位置新增一行
+   		// 在表格中指定的位置新增一行
    		XWPFTableRow targetRow = table.insertNewTableRow(newrowIndex);
    		// 获取需要复制行对象
    		XWPFTableRow copyRow = table.getRow(copyrowIndex);

@@ -457,7 +457,7 @@ public class ExportWordUtils extends XWPFDocument {
 	 * @throws Exception
 	 */
 	public static void exportWord(List<Map<String, Object>> data, OutputStream out) throws Exception {
-        // TODO 导出word文件
+        // 导出word文件
 		XWPFDocument document = createParagraphDoc(data);
         try {
             document.write(out);

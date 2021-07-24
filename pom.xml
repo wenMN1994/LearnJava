@@ -20,6 +20,7 @@
         <module>LearnFreemarker</module>
         <module>LearnLucene</module>
         <module>LearnJxls</module>
+        <module>LearnJUC</module>
     </modules>
 
     <properties>
