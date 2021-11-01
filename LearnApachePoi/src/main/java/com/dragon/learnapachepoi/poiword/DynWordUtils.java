@@ -1,25 +1,26 @@
 package com.dragon.learnapachepoi.poiword;
 
-//import junit.framework.Assert;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.XmlCursor;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVMerge;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
  * word文档模板文件生成
  * 1:绘制表格(指定位置插入,默认表格末尾新增)2:绘制段落文字内容3:标签处替换图片等
- *
- * @author DragonWen
+ * @author ex-liuqian
  */
 public class DynWordUtils {
 	private static Logger logger = LoggerFactory.getLogger(DynWordUtils.class);
@@ -58,11 +59,16 @@ public class DynWordUtils {
      * 重复模式的占位符所在的行索引
      */
     private int currentRowIndex;
-    
-    
-    private int currentTableIndex;// 当前表格
-    
-    private int currentTableTotalIndex;// 当前表格总行数（注意动态表格是在指定位置新增单元格，行数对应新增）
+
+    /**
+     * 当前表格
+     */
+    private int currentTableIndex;
+
+    /**
+     * 当前表格总行数（注意动态表格是在指定位置新增单元格，行数对应新增）
+     */
+    private int currentTableTotalIndex;
 
     /**
      * 入口
@@ -71,7 +77,7 @@ public class DynWordUtils {
      * @param outPath      生成的文件存放的本地全路径
      */
     public static void process(Map<String, Object> paramMap, String templatePaht, String outPath) {
-        // 入口
+        // TODO 入口
     	DynWordUtils dynWordUtils = new DynWordUtils();
         dynWordUtils.setParamMap(paramMap);
         dynWordUtils.createWord(templatePaht, outPath);
@@ -93,7 +99,6 @@ public class DynWordUtils {
         try {
 	    	inputStream = new FileInputStream(new File(templatePath));
 	    	outputStream = new FileOutputStream(outPath);
-	    	// templateDoc = new XWPFDocument(OPCPackage.open(inFile));
 	    	templateDoc = new XWPFDocument(inputStream);
             parseTemplateWord();
             templateDoc.write(outputStream);
@@ -123,20 +128,6 @@ public class DynWordUtils {
 				logger.error(e.getMessage(), e);
 			}
 		}
-        
-       /* try (FileOutputStream outStream = new FileOutputStream(outPath)) {
-            templateDoc = new XWPFDocument(OPCPackage.open(inFile));
-            parseTemplateWord();
-            templateDoc.write(outStream);
-        } catch (Exception e) {
-            StackTraceElement[] stackTrace = e.getStackTrace();
-            String className = stackTrace[0].getClassName();
-            String methodName = stackTrace[0].getMethodName();
-            int lineNumber = stackTrace[0].getLineNumber();
-            logger.error("错误：第:{}行, 类名:{}, 方法名:{}", lineNumber, className, methodName);
-            logger.error("word文档文件生成异常createWord:"+e.getMessage(), e);;	
-            throw new RuntimeException(e.getCause().getMessage());
-        }*/
     }
 
     /**
@@ -157,7 +148,8 @@ public class DynWordUtils {
             } else if (element instanceof XWPFTable) {
                 // 解析word文档内容：表格段落
                 isTable = true;
-                XWPFTable table = (XWPFTable) element;// 当前表格对象
+                // 当前表格对象
+                XWPFTable table = (XWPFTable) element;
                 settleTable(table, paramMap);
                 isTable = false;
             }
@@ -275,7 +267,8 @@ public class DynWordUtils {
     	currentTableTotalIndex = rows.size();
     	int totalRows = rows.size();
     	
-        for (int i = 0; i < totalRows; i++) {// 遍历当前表格段落的每一行
+        for (int i = 0; i < totalRows; i++) {
+            // 遍历当前表格段落的每一行
             XWPFTableRow row = rows.get(i);
             totalRows = rows.size();
             logger.info("解析后当前表格行数共计="+totalRows);
@@ -299,7 +292,7 @@ public class DynWordUtils {
      * @throws Exception
      */
     private boolean delAndJudgeRow(XWPFTable table, Map<String, Object> paramMap, XWPFTableRow row) throws Exception {
-        // 表格动态行处理
+        // TODO 表格动态行处理
         logger.info("当前行数="+currentRowIndex);
     	if (PoiWordUtils.isAddRow(row)) {
             List<XWPFTableRow> xwpfTableRows = addAndGetRows(table, row, paramMap);
@@ -310,7 +303,12 @@ public class DynWordUtils {
             return true;
         }
 
-        // 如果是重复添加的行
+        if (PoiWordUtils.isInsertRow(row)) {
+            insertAndGetRows(table, row, paramMap);
+            return true;
+        }
+
+      // 如果是重复添加的行
         if (PoiWordUtils.isAddRowRepeat(row)) {
             List<XWPFTableRow> xwpfTableRows = addAndGetRepeatRows(table, row, paramMap);
             // 回溯添加的行，这里是试图处理动态添加的图片
@@ -419,8 +417,8 @@ public class DynWordUtils {
         int cellSize = flagRow.getTableCells().size();
         for (int i = 0, size = dataList.size(); i < size; i++) {
             if (i != 0) {
-                currentRow = table.createRow();// 在表格最后加行，不适用于复杂表格
-
+                // 在表格最后加行，不适用于复杂表格
+                currentRow = table.createRow();
                 // 复制样式
                 if (flagRow.getCtRow() != null) {
                     currentRow.getCtRow().setTrPr(flagRow.getCtRow().getTrPr());
@@ -430,6 +428,47 @@ public class DynWordUtils {
             newRows.add(currentRow);
         }
         return newRows;
+    }
+
+    /**
+     * 复制行并插入下一行
+     *
+     * @param table
+     * @param flagRow  flagRow 标有标签的行
+     * @param paramMap 参数
+     */
+    private void insertAndGetRows(XWPFTable table, XWPFTableRow flagRow, Map<String, Object> paramMap) throws Exception {
+        List<XWPFTableCell> flagRowCells = flagRow.getTableCells();
+        XWPFTableCell flagCell = flagRowCells.get(0);
+
+        String text = flagCell.getText();// ${tbInsertRow:6,7,tb1}
+        @SuppressWarnings("unchecked")
+        List<List<String>> dataList = (List<List<String>>) PoiWordUtils.getValueByPlaceholder(paramMap, text);
+
+        String tbInsertMatrix = PoiWordUtils.getTbInertMatrix(text);
+
+        String[] split = tbInsertMatrix.split(PoiWordUtils.tbRepeatMatrixSeparator);
+        int copyRowIndex = Integer.parseInt(split[0]);
+        int newRowIndex = Integer.parseInt(split[1]);
+
+        if(CollectionUtils.isEmpty(dataList)){
+            insertRowPosition(table,copyRowIndex,newRowIndex);
+        }else {
+            for (int i = 0, size = dataList.size(); i < size; i++) {
+                insertRowPosition(table,copyRowIndex,newRowIndex + i);
+                XWPFTableRow tableRow = table.getRow(newRowIndex + i);
+                List<XWPFTableCell> tableCells = tableRow.getTableCells();
+                List<String> paramList = dataList.get(i);
+                if(!Objects.equals(paramList.size(),tableCells.size())){
+                    throw new RuntimeException(text+"-参数项的Size()必须等于当前行单元格列数");
+                }
+                for (int j = 0; j < paramList.size(); j++) {
+                    XWPFTableCell cell = tableCells.get(j);
+                    cell.setText(paramList.get(j));
+                }
+            }
+        }
+        table.removeRow(copyRowIndex);
     }
 
     /**
@@ -447,7 +486,6 @@ public class DynWordUtils {
         @SuppressWarnings("unchecked")
 		List<List<String>> dataList = (List<List<String>>) PoiWordUtils.getValueByPlaceholder(paramMap, text);
         String tbRepeatMatrix = PoiWordUtils.getTbRepeatMatrix(text);
-//        Assert.assertNotNull("模板矩阵不能为空", tbRepeatMatrix);
         
         if(dataList == null){
         	return new ArrayList<XWPFTableRow>();
@@ -473,7 +511,8 @@ public class DynWordUtils {
             if (i == 0) {
                 table.removeRow(currentRowIndex);
             }
-            currentRow = table.createRow();// 在表格最后加行，不适用于复杂表格
+            // 在表格最后加行，不适用于复杂表格
+            currentRow = table.createRow();
             // 复制样式
             if (repeatFlagRow.getCtRow() != null) {
                 currentRow.getCtRow().setTrPr(repeatFlagRow.getCtRow().getTrPr());
@@ -494,11 +533,12 @@ public class DynWordUtils {
      */
     private List<XWPFTableRow> addAndGetMergeRows(XWPFTable table, XWPFTableRow flagRow, Map<String, Object> paramMap) throws Exception {
     	// 添加动态行并且合并等
-    	List<XWPFTableCell> flagRowCells = flagRow.getTableCells();// 获取待添加的数据总数
+        // 获取待添加的数据总数
+    	List<XWPFTableCell> flagRowCells = flagRow.getTableCells();
     	XWPFTableCell flagCell = flagRowCells.get(0);
-    	
-    	String text = flagCell.getText();// ${tbAddRowMerge:tb3}
-    	// List<List<String>> dataList = (List<List<String>>) PoiWordUtils.getValueByPlaceholder(paramMap, text);
+
+        // ${tbAddRowMerge:tb3}
+        String text = flagCell.getText();
     	@SuppressWarnings("unchecked")
 		List<Map<String,List<List<String>>>> dataAddList = (List<Map<String, List<List<String>>>>) PoiWordUtils.getValueByPlaceholder(paramMap, text);
     	
@@ -524,8 +564,10 @@ public class DynWordUtils {
     		return newRows;
     	}
     	XWPFTableRow currentRow = flagRow;
-    	int cellSize = flagRow.getTableCells().size();// 待添加数据行数
-    	int totalIndex = 0;// 总添加数据计数
+        // 待添加数据行数
+    	int cellSize = flagRow.getTableCells().size();
+        // 总添加数据计数
+    	int totalIndex = 0;
     	if(CollectionUtils.isNotEmpty(dataAddList)){
     		for (Map<String, List<List<String>>> map : dataAddList) {
     			Set<String> keySet = map.keySet();
@@ -534,28 +576,30 @@ public class DynWordUtils {
     					continue;
     				}
     		    	List<List<String>> dataList = map.get(key);
-    		    	
-    				boolean rowFlag = key.contains("tbAddRowMergeRow");// 合并行
-    				boolean colFlag = key.contains("tbAddRowMergeCol");// 合并列
+                    // 合并行
+    				boolean rowFlag = key.contains("tbAddRowMergeRow");
+                    // 合并列
+    				boolean colFlag = key.contains("tbAddRowMergeCol");
     				
     				if (dataList == null || dataList.size() <= 0) {
     		    		return newRows;
     		    	}
     		    	for (int i = 0, size = dataList.size(); i < size; i++) {
     		    		if (totalIndex != 0) {
-    		                // currentRow = table.createRow();// 在表格最后加行，不适用于复杂表格
-    		                currentRow = table.insertNewTableRow(currentRowIndex+totalIndex);// 指定行添加
+                            // 指定行添加
+    		                currentRow = table.insertNewTableRow(currentRowIndex+totalIndex);
     		                // 复制样式
     		                if (flagRow.getCtRow() != null) {
     		                    currentRow.getCtRow().setTrPr(flagRow.getCtRow().getTrPr());
     		                }
-    		                currentTableTotalIndex++;// 总行数新增
+                            // 总行数新增
+    		                currentTableTotalIndex++;
     		            }
     		    		
     		    		// flagCell:模板列(标记占位符的那个cell),row:新增的行,cellSize:每行的列数量（用来补列补足的情况）；rowDataList 每行的数据
     		    		insertRow(flagCell, currentRow, cellSize, dataList.get(i));
-    		            
-    		            newRows.add(currentRow);// 注意这儿添加行，会直接从最后一列开始添加
+                        // 注意这儿添加行，会直接从最后一列开始添加
+    		            newRows.add(currentRow);
     		            totalIndex++;
     		    	}
     		    	
@@ -566,13 +610,17 @@ public class DynWordUtils {
     					lastStr = splitArr[1];
     				}
     				String[] split = lastStr.split(",");
-    		    	int startRowCol = Integer.parseInt(split[0]);// 合并行：合并开始列；合并列：合并开始行
-    		    	int start = Integer.parseInt(split[1]);// 开始行/列
-    		    	int last = Integer.parseInt(split[2]);// 结束行/列
-    		    	// int endCell = Integer.parseInt(split[3]);
-    				if(rowFlag){// 合并行
+    				// 合并行：合并开始列；合并列：合并开始行
+    		    	int startRowCol = Integer.parseInt(split[0]);
+                    // 开始行/列
+    		    	int start = Integer.parseInt(split[1]);
+                    // 结束行/列
+    		    	int last = Integer.parseInt(split[2]);
+    				if(rowFlag){
+                        // 合并行
     					mergeCellVertically(table, startRowCol, start, last);
-    				}else if(colFlag){// 合并列
+    				}else if(colFlag){
+                        // 合并列
     					mergeCellsHorizontal(table, startRowCol, start, last);
     				}
     			}
@@ -608,7 +656,7 @@ public class DynWordUtils {
    	 * @param newrowIndex 需要新增一行的位置
    	 * */
    	public static void insertRowPosition(XWPFTable table, int copyrowIndex, int newrowIndex) {
-   		// 在表格中指定的位置新增一行
+   		// TODO 在表格中指定的位置新增一行
    		XWPFTableRow targetRow = table.insertNewTableRow(newrowIndex);
    		// 获取需要复制行对象
    		XWPFTableRow copyRow = table.getRow(copyrowIndex);

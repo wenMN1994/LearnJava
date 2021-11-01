@@ -17,7 +17,6 @@ public class DynWordUtilsTest2 {
     public static void main(String[] args) {
 
         // 模板全的路径
-        //String templatePath = "D:\\Project\\idea-workspace\\LearnJava\\LearnApachePoi\\src\\main\\resources\\wordTemplate\\审查报告模板1023体检表.docx";
 //        String templatePath = "D:\\Project\\idea-workspace\\LearnJava\\LearnApachePoi\\src\\main\\resources\\wordTemplate\\新建 Microsoft Word 文档.docx";
         String templatePath = "D:\\Project\\idea-workspace\\LearnJava\\LearnApachePoi\\src\\main\\resources\\wordTemplate\\word00.docx";
 

@@ -1,6 +1,5 @@
 package com.dragon.learnapachepoi.poiword;
 
-//import junit.framework.Assert;
 import org.apache.poi.xwpf.usermodel.*;
 
 import java.util.List;
@@ -37,15 +36,24 @@ public class PoiWordUtils {
      */
     public static final String addRowText = "tbAddRow:";
 
+    public static final String insertRowText = "tbInsertRow:";
+
     public static final String addRowRepeatText = "tbAddRowRepeat:";
-    
-    // 合并行，列标志
+
+    /**
+     * 合并行，列标志
+     */
     public static final String addRowMergeText = "tbAddRowMerge:";
     
     /**
      * 表格中占位符的开头 ${tbAddRow:  例如${tbAddRow:tb1}
      */
     public static final String addRowFlag = PLACEHOLDER_PREFIX + addRowText;
+
+    /**
+     * 表格中占位符的开头 ${tbInsertRow:  例如${tbInsertRow:6,7,tb1} 第6行为复制行，第7行为新增行
+     */
+    public static final String insertRowFlag = PLACEHOLDER_PREFIX + insertRowText;
     
     /**
      * 合并标志
@@ -80,6 +88,15 @@ public class PoiWordUtils {
      */
     public static boolean isAddRow(XWPFTableRow row) {
         return isDynRow(row, addRowFlag);
+    }
+
+    /**
+     * 判断当前行是不是标志表格中需要插入行
+     * @param row
+     * @return
+     */
+    public static boolean isInsertRow(XWPFTableRow row) {
+        return isDynRow(row, insertRowFlag);
     }
     
     /**
@@ -139,9 +156,17 @@ public class PoiWordUtils {
      * @return {0,2,0,1}
      */
     public static String getTbRepeatMatrix(String key) {
-//        Assert.assertNotNull("占位符为空", key);
-        
         String $1 = key.replaceAll("\\" + PREFIX_FIRST + "\\" + PREFIX_SECOND + addRowRepeatText + "(.*)" + "\\" + PLACEHOLDER_SUFFIX, "$1");
+        return $1;
+    }
+
+    /**
+     * 后去占位符的复制行矩阵
+     * @param key 占位符
+     * @return {6,7,flag} 6:需要复制的行位置; 7:需要新增一行的位置; flag: 占位符标志
+     */
+    public static String getTbInertMatrix(String key) {
+        String $1 = key.replaceAll("\\" + PREFIX_FIRST + "\\" + PREFIX_SECOND + insertRowText + "(.*)" + "\\" + PLACEHOLDER_SUFFIX, "$1");
         return $1;
     }
     
@@ -151,8 +176,6 @@ public class PoiWordUtils {
      * @return
      */
     public static String getTbMergeMatrix(String key) {
-//    	Assert.assertNotNull("占位符为空", key);
-    	
     	String $1 = key.replaceAll("\\" + PREFIX_FIRST + "\\" + PREFIX_SECOND + addRowMergeText + "(.*)" + "\\" + PLACEHOLDER_SUFFIX, "$1");
     	return $1;
     }
@@ -285,5 +308,5 @@ public class PoiWordUtils {
 
         }
     }
-	
+
 }
