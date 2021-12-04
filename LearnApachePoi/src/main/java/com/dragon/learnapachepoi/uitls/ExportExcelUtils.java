@@ -34,7 +34,6 @@ public class ExportExcelUtils {
     }
 
     public static void exportExcel(ExcelData data, OutputStream out) throws Exception {
-
         XSSFWorkbook wb = new XSSFWorkbook();
         try {
             String sheetName = data.getName();
@@ -91,10 +90,12 @@ public class ExportExcelUtils {
     }
 
     public static void writeExcel(XSSFWorkbook wb, Sheet sheet, ExcelData data) {
-        // int rowIndex = 0;
         int rowIndex = sheet.getLastRowNum();
-        if(rowIndex>0) {
-            rowIndex+=2;
+        if(rowIndex < 0){
+            rowIndex = 0;
+        }
+        if(rowIndex > 0) {
+            rowIndex += 2;
         }
         rowIndex = writeTitlesToExcel(wb, sheet, data.getTitles(),rowIndex);
         writeRowsToExcel(wb, sheet, data.getRows(), rowIndex);
@@ -102,7 +103,6 @@ public class ExportExcelUtils {
     }
 
     public static int writeTitlesToExcel(XSSFWorkbook wb, Sheet sheet, List<String> titles,int rowIndex) {
-        // int rowIndex = 0;
         int colIndex = 0;
 
         Font titleFont = wb.createFont();

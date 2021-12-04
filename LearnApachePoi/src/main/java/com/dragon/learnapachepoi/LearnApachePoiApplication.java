@@ -7,7 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author DragonWen
  */
 @SpringBootApplication
-public class LearnApachePoiApplication {
+public class
+LearnApachePoiApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(LearnApachePoiApplication.class, args);

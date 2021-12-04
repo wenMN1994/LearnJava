@@ -40,13 +40,13 @@ public class ExcelController {
             List<List<Object>> dataList = new ArrayList<List<Object>>();
             ExcelData excelData = new ExcelData();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddhhmmss");
-            String str=sdf.format(new Date());
+            String str = sdf.format(new Date());
 
             List<UserEntity> userEntityList = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
                 UserEntity userEntity = new UserEntity();
-                userEntity.setName("张三"+i);
-                userEntity.setAge("2"+i+"");
+                userEntity.setName("张三" + i);
+                userEntity.setAge("2" + i + "");
                 if(i%2 == 0){
                     userEntity.setSex("男");
                 }else {
